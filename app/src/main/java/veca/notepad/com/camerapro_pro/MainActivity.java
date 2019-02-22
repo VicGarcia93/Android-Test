@@ -8,8 +8,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.PersistableBundle;
+import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 100;
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 200;
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static  final int IMAGE_GET_CONTENT = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +57,16 @@ public class MainActivity extends AppCompatActivity {
                 tomarFoto();
             }
         });
+
+        btnGaleria.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                seleccionarFoto();
+            }
+        });
     }
+
+
 
     @Override
     protected void onDestroy() {
@@ -75,10 +87,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         //Toast.makeText(this, "onRestart", Toast.LENGTH_SHORT).show();
-        File foto = new File(imageurl);
-        if(foto.exists()){
-           // Toast.makeText(this, "Existe la foto", Toast.LENGTH_SHORT).show();
-        }
+
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -104,6 +113,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+
+
     private void tomarFotoIntent() {
         values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, "MyPicture");
@@ -119,20 +131,7 @@ public class MainActivity extends AppCompatActivity {
         //Toast.makeText(this, "Foto tomada", Toast.LENGTH_SHORT).show();
         Log.e("4.-","Preparado para tomar la foto");
     }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            try{
-               // Bundle extras = data.getExtras();
-                Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-                imvPresentador.setImageBitmap(imageBitmap);
-                imageurl = getRealPathFromURI(imageUri);
-            }catch(Exception e){
-                Toast.makeText(this, "Error al obtener la imagen " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
 
-        }
-    }
 
     public String getRealPathFromURI(Uri contentUri) {
         String[] proj = { MediaStore.Images.Media.DATA };
@@ -186,6 +185,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+    private void seleccionarFoto() {
+        Intent intentSeleccionarFoto = new Intent(Intent.ACTION_GET_CONTENT);
+        intentSeleccionarFoto.setType("image/*");
+        if(intentSeleccionarFoto.resolveActivity(getPackageManager()) != null){
+            startActivityForResult(intentSeleccionarFoto, IMAGE_GET_CONTENT);
+        }
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -207,6 +214,23 @@ public class MainActivity extends AppCompatActivity {
                     }
                     return;
 
+        }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            try{
+                // Bundle extras = data.getExtras();
+                Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                imvPresentador.setImageBitmap(imageBitmap);
+                imageurl = getRealPathFromURI(imageUri);
+            }catch(Exception e){
+                Toast.makeText(this, "Error al obtener la imagen " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+        }else if(requestCode == IMAGE_GET_CONTENT && resultCode == RESULT_OK){
+            Uri fotoSeleccionada = data.getData();
+            imvPresentador.setImageURI(fotoSeleccionada);
         }
     }
 }

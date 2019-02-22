@@ -2,7 +2,7 @@
     <string name="app_name">Camera Pro-Pro</string>
 
     <string name="btnTomarFoto">Tomar foto</string>
-    <string name="btnGaleria">Galería</string>
+    <string name="btnGaleria">Seleccionar foto</string>
     <string name="btnFiltro1">Aplicar Filtro</string>
     <string name="alertSalir">¿Realmente deseas salir?</string>
     <string name="btnSi">Sí</string>
